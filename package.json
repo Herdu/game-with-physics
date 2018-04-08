@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "browser-sync": "^2.23.6",
-    "matter-js": "^0.14.1"
+    "matter-js": "^0.14.1",
+    "poly-decomp": "^0.2.1"
   }
 }
