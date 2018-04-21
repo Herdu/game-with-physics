@@ -17,25 +17,28 @@ class World {
 
         vertices.push({
             x: -step,
-            y: posY + 200
+            y: posY + 600
         });
 
         for(let i = 0; i<numberOfVertices; i++) {
             let x = i*step;
-            let y = Math.round(posY + 30 * Math.sin(i));
+            let y = Math.round(posY + 30 * Math.sin(i)) + 100 * Math.random();
 
             vertices.push(Matter.Vector.create(x,y));
         }
 
         vertices.push({
             x:  (numberOfVertices) * step,
-            y: posY + 200
+            y: posY + 600
         });
 
         this.ground = Matter.Bodies.fromVertices(numberOfVertices*step/2, 500, vertices, {
             isStatic: true,
             isGround: true,
             color: color(67,0,0),
+            collisionFilter: {
+                category: 0x0001
+            }
         });
         console.log(vertices);
         console.log(this.ground);
@@ -54,8 +57,16 @@ class World {
     }
 
     draw() {
-        //this.drawConstraints();
-        this.drawBodies();
+        this.drawBackground();
+
+        this.drawConstraints(this.engine.world.constraints);
+        this.drawBodies(this.engine.world.bodies);
+
+        this.engine.world.composites.forEach(item=>{
+           this.drawBodies(item.bodies);
+           this.drawConstraints(item.constraints);
+        });
+
     }
 
     drawBody(item) {
@@ -101,8 +112,8 @@ class World {
         noStroke();
     }
 
-    drawBodies() {
-        this.engine.world.bodies.forEach((item)=>{
+    drawBodies(bodies) {
+       bodies.forEach((item)=>{
             if(item.parts.length > 1) {
                 item.parts.forEach((part, index)=> {
                     if(index) { //skip first
@@ -115,11 +126,11 @@ class World {
         })
     }
 
-    drawConstraints() {
+    drawConstraints(constraints) {
 
         stroke(126);
 
-        this.engine.world.constraints.forEach((item)=>{
+        constraints.forEach((item)=>{
             line(
                 item.bodyA.position.x + item.pointA.x,
                 item.bodyA.position.y + item.pointA.y,
@@ -129,5 +140,29 @@ class World {
 
         })
         noStroke();
+    }
+
+    drawBackground() {
+        let offset = car.body[0].position;
+
+
+        let width = settings.resolutionX;
+
+        let backgroundOffset = {
+            x: ((offset.x)*settings.backgroundSpeed),
+            y: ((offset.y)*settings.backgroundSpeed)
+        };
+
+        while((offset.x - backgroundOffset.x) > width) {
+            backgroundOffset.x += width;
+        }
+
+        translate(-offset.x + settings.resolutionX/2, -offset.y + settings.resolutionY/2);
+        background(0,0,255);
+        noStroke();
+
+        image(backgroundImg, backgroundOffset.x, offset.y, settings.resolutionX, settings.resolutionY);
+        image(backgroundImg, backgroundOffset.x + width, offset.y, settings.resolutionX, settings.resolutionY);
+        fill(0,255,0);
     }
 }
